@@ -543,7 +543,8 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                                         ) {
                                             Icon(
-                                                Icons.Default.History,
+                                                imageVector = Icons.Default.History,
+                                                contentDescription = "Play count",
                                                 modifier = Modifier.size(16.dp),
                                                 tint = MaterialTheme.colorScheme.primary
                                             )
