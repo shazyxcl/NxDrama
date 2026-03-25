@@ -85,18 +85,6 @@ fun HomeScreen(
             if (state.libraryMode == LibraryMode.EXPLORE) {
 
                 item {
-                    ElevatedCard {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                "Selamat Datang!",
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                            Text("Nikmati streaming drama favoritmu")
-                        }
-                    }
-                }
-
-                item {
                     TabRow(selectedTabIndex = state.feedMode.ordinal) {
                         FeedMode.entries.forEach { mode ->
                             Tab(

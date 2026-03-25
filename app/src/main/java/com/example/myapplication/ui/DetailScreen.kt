@@ -1,15 +1,19 @@
 package com.example.myapplication.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,7 +23,6 @@ fun DetailScreen(
     onPlay: () -> Unit
 ) {
     val state = vm.state
-    var expanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -28,17 +31,6 @@ fun DetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, null)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { vm.toggleFavorite() }) {
-                        Icon(
-                            if (state.favoriteIds.contains(state.selectedDrama?.bookId))
-                                Icons.Default.Favorite
-                            else
-                                Icons.Default.FavoriteBorder,
-                            contentDescription = null
-                        )
                     }
                 }
             )
@@ -50,64 +42,26 @@ fun DetailScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            item {
-                ElevatedCard(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(modifier = Modifier.height(220.dp)) {
-                        if (state.streamOptions.isNotEmpty()) {
-                            PlayerScreen(
-                                url = state.streamOptions
-                                    .firstOrNull { it.label == state.selectedQuality }
-                                    ?.url ?: "",
-                                title = state.detail?.title ?: "",
-                                onBack = {},
-                                onToggleFullscreen = { vm.toggleFullscreen() },
-                                isFullscreen = state.isFullscreen
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("Loading video...")
-                            }
-                        }
-                    }
-                }
-            }
 
+            // 🔥 THUMBNAIL SECTION
             item {
-            
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-            
-                    TextField(
-                        value = state.selectedQuality,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Kualitas") },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded)
-                        },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
-                    )
-            
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                state.detail?.thumbnail?.let { thumbnailUrl ->
+                    ElevatedCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        state.streamOptions.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option.label) },
-                                onClick = {
-                                    vm.selectQuality(option.label)
-                                    expanded = false
-                                }
-                            )
-                        }
+                        Image(
+                            painter = rememberAsyncImagePainter(thumbnailUrl),
+                            contentDescription = "Thumbnail ${state.detail?.title}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
                     }
                 }
             }
@@ -116,41 +70,72 @@ fun DetailScreen(
             item {
                 Button(
                     onClick = onPlay,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Play Video")
                 }
+                
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 🔥 DESKRIPSI
+            // 🔥 SYNOPSIS / INTRO
             item {
                 ElevatedCard(
-                    modifier = Modifier.padding(vertical = 12.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         state.detail?.intro ?: "",
                         modifier = Modifier.padding(12.dp)
                     )
                 }
+                
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 🔥 EPISODE LIST
+            // 🔥 EPISODES SECTION
+            item {
+                Text(
+                    "Daftar Episode",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             items(state.detail?.episodes ?: emptyList()) { ep ->
                 ElevatedCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
+                        .padding(vertical = 4.dp)
                         .clickable {
                             vm.selectEpisode(ep.index - 1)
                             onPlay()
-                        }
+                        },
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
-                    Text(
-                        "Episode ${ep.index}",
-                        modifier = Modifier.padding(12.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Episode ${ep.index}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = "Play",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
