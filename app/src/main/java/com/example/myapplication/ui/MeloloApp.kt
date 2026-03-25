@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Fullscreen  // Tambahkan import ini
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -587,12 +586,11 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                                         ) {
                                             NativePlayer(url = activeUrl)
                                             Icon(
-                                                Icons.Default.Fullscreen,
+                                                Icons.Default.Fullscreen, // Ganti Search dengan Fullscreen
                                                 contentDescription = "Fullscreen",
                                                 modifier = Modifier.size(48.dp),
                                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                             )
-                                        }
                                     }
                                 }
                             }
@@ -753,6 +751,7 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
     }
 }
 
+// Rest of the composable functions remain the same...
 @Composable
 private fun DramaListItem(
     item: DramaItem,
@@ -929,42 +928,4 @@ private fun NativePlayer(url: String) {
         },
         modifier = Modifier.fillMaxSize()
     )
-}
-
-@Composable
-private fun PlayerScreen(
-    url: String,
-    title: String,
-    onBack: () -> Unit,
-    onToggleFullscreen: () -> Unit,
-    isFullscreen: Boolean
-) {
-    // Implementasi sederhana untuk PlayerScreen
-    Scaffold(
-        topBar = {
-            if (!isFullscreen) {
-                TopAppBar(
-                    title = { Text(title) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.Default.Search, contentDescription = "Back")
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = onToggleFullscreen) {
-                            Icon(Icons.Default.Fullscreen, contentDescription = "Fullscreen")
-                        }
-                    }
-                )
-            }
-        }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            NativePlayer(url = url)
-        }
-    }
 }
