@@ -10,6 +10,7 @@ data class FavoriteDramaEntity(
     val title: String,
     val synopsis: String,
     val episodeText: String,
+    val thumbnail: String,
     val updatedAt: Long
 )
 
@@ -23,5 +24,6 @@ data class WatchHistoryEntity(
     val title: String,
     val episodeIndex: Int,
     val videoId: String,
+    val thumbnail: String,
     val watchedAt: Long
 )
