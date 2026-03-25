@@ -1,12 +1,13 @@
-alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.kotlinxSerialization)
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)  // Perbaiki: hapus "plibs."
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
+}
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 36
+    compileSdk = 35
     
     defaultConfig {
         applicationId = "com.example.myapplication"
@@ -23,6 +24,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -43,6 +45,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/gradle/incremental.annotation.processors"
         }
     }
 }
@@ -83,9 +86,6 @@ dependencies {
 
     // Image Loading
     implementation("io.coil-kt:coil-compose:2.6.0")
-    
-    // Navigation
-    implementation("androidx.navigation:navigation-compose:2.7.7")
     
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
