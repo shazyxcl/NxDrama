@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.foundation.background
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
@@ -25,6 +26,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -63,7 +65,6 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
     }
 
     if (showFullscreenPlayer && activeUrl.isNotBlank()) {
-        // Gunakan PlayerScreen yang sudah ada di file terpisah
         PlayerScreen(
             url = activeUrl,
             title = state.detail?.title ?: "Player",
@@ -72,13 +73,11 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
             isFullscreen = state.isFullscreen
         )
     } else {
-        // Modal Drawer untuk Main Menu
         ModalNavigationDrawer(
             drawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
             gesturesEnabled = showDrawer,
             drawerContent = {
                 ModalDrawerSheet {
-                    // Header Drawer
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -99,8 +98,6 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                         }
                     }
                     HorizontalDivider()
-                    
-                    // Menu Items
                     NavigationDrawerItem(
                         icon = { Icon(Icons.Default.Search, contentDescription = "Explore") },
                         label = { Text("Explore") },
@@ -468,26 +465,12 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                                     val selected = state.selectedDrama
                                     val isFav = selected?.bookId?.let { state.favoriteIds.contains(it) } == true
                                     Icon(
-                                        if (isFav) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
+                                        if (isFav) Icons.Filled.Favorite else Icons.Outlined.Favorite,
                                         contentDescription = if (isFav) "Remove from favorites" else "Add to favorites"
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(if (isFav) "Unfavorite" else "Favorite")
                                 }
-                              /**  FilledTonalButton(
-                                    onClick = vm::toggleFavorite,
-                                    enabled = state.selectedDrama != null,
-                                    shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    val selected = state.selectedDrama
-                                    val isFav = selected?.bookId?.let { state.favoriteIds.contains(it) } == true
-                                    Icon(
-                                        if (isFav) Icons.Filled.Favorite else Icons.Default.Favorite,
-                                        contentDescription = if (isFav) "Remove from favorites" else "Add to favorites"
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(if (isFav) "Unfavorite" else "Favorite")
-                                }**/
                             }
                         }
 
