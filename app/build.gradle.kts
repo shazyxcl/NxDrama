@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-kapt")  // Add this line for kapt support
+    id("kotlin-kapt")
 }
 
 android {
@@ -37,10 +37,9 @@ android {
     }
     
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.2"
+        kotlinCompilerExtensionVersion = "1.5.4"  // Updated to work with Kotlin 1.9.20
     }
     
-    // packaging (not packagingOptions)
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -48,7 +47,6 @@ android {
     }
 }
 
-// Use kotlinOptions (not compilerOptions) for Kotlin 1.7.x/1.9.x
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "17"
@@ -56,7 +54,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 }
 
 dependencies {
-    implementation(platform("androidx.compose:compose-bom:2025.06.01"))
+    implementation(platform("androidx.compose:compose-bom:2024.12.01"))  // Optional: use a stable BOM
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
