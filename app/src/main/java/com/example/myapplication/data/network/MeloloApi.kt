@@ -1,4 +1,4 @@
-package id.sansekai.melolo.data.network
+package com.example.myapplication.data.network
 
 import com.google.gson.JsonObject
 import retrofit2.http.GET
