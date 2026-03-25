@@ -1,4 +1,4 @@
-package id.sansekai.melolo.data
+package com.example.myapplication.data
 
 import android.content.Context
 import android.util.Base64
@@ -6,16 +6,16 @@ import androidx.room.Room
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import id.sansekai.melolo.data.local.FavoriteDramaEntity
-import id.sansekai.melolo.data.local.MeloloDatabase
-import id.sansekai.melolo.data.local.WatchHistoryEntity
-import id.sansekai.melolo.data.model.DramaDetail
-import id.sansekai.melolo.data.model.DramaItem
-import id.sansekai.melolo.data.model.EpisodeItem
-import id.sansekai.melolo.data.model.FeedMode
-import id.sansekai.melolo.data.model.StreamOption
-import id.sansekai.melolo.data.model.WatchHistoryItem
-import id.sansekai.melolo.data.network.MeloloApi
+import com.example.myapplication.data.local.FavoriteDramaEntity
+import com.example.myapplication.data.local.MeloloDatabase
+import com.example.myapplication.data.local.WatchHistoryEntity
+import com.example.myapplication.data.model.DramaDetail
+import com.example.myapplication.data.model.DramaItem
+import com.example.myapplication.data.model.EpisodeItem
+import com.example.myapplication.data.model.FeedMode
+import com.example.myapplication.data.model.StreamOption
+import com.example.myapplication.data.model.WatchHistoryItem
+import com.example.myapplication.data.network.MeloloApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import retrofit2.Retrofit
