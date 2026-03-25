@@ -16,7 +16,8 @@ data class DramaItem(
     val bookId: String,
     val title: String,
     val synopsis: String,
-    val episodeText: String
+    val episodeText: String,
+    val thumbnail: String = "" // Tambahkan thumbnail
 )
 
 data class EpisodeItem(
@@ -28,7 +29,8 @@ data class DramaDetail(
     val title: String,
     val intro: String,
     val playCount: Long,
-    val episodes: List<EpisodeItem>
+    val episodes: List<EpisodeItem>,
+    val thumbnail: String = "" // Tambahkan thumbnail
 )
 
 data class StreamOption(
@@ -43,5 +45,6 @@ data class WatchHistoryItem(
     val title: String,
     val episodeIndex: Int,
     val videoId: String,
-    val watchedAt: Long
+    val watchedAt: Long,
+    val thumbnail: String = "" // Tambahkan thumbnail
 )
