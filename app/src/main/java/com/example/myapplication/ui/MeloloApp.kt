@@ -449,7 +449,36 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                         }
                         
+                        // Di bagian Detail Section, sekitar baris 530-560:
                         item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "Detail Drama",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                FilledTonalButton(
+                                    onClick = vm::toggleFavorite,
+                                    enabled = state.selectedDrama != null,
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    val selected = state.selectedDrama
+                                    val isFav = selected?.bookId?.let { state.favoriteIds.contains(it) } == true
+                                    Icon(
+                                        if (isFav) Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                                        contentDescription = if (isFav) "Remove from favorites" else "Add to favorites"
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(if (isFav) "Unfavorite" else "Favorite")
+                                }
+                            }
+                        }
+                        
+                  /**      item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -475,7 +504,7 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                                     Text(if (isFav) "Unfavorite" else "Favorite")
                                 }
                             }
-                        }
+                        }**/
 
                         if (state.detailLoading) {
                             item {
