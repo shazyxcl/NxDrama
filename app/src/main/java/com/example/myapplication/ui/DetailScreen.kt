@@ -49,19 +49,16 @@ fun DetailScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-
-            // 🔥 VIDEO PLAYER PREVIEW (AUTO LOAD)
             item {
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Box(modifier = Modifier.height(220.dp)) {
-
                         if (state.streamOptions.isNotEmpty()) {
                             PlayerScreen(
                                 url = state.streamOptions
-    .firstOrNull { it.label == state.selectedQuality }
-    ?.url ?: ""
+                                    .firstOrNull { it.label == state.selectedQuality }
+                                    ?.url ?: "",
                                 title = state.detail?.title ?: "",
                                 onBack = {},
                                 onToggleFullscreen = { vm.toggleFullscreen() },
