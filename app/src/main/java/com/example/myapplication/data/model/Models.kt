@@ -1,4 +1,4 @@
-package id.sansekai.melolo.data.model
+package com.example.myapplication.data.model
 
 enum class FeedMode(val path: String, val label: String) {
     FOR_YOU("foryou", "For You"),
