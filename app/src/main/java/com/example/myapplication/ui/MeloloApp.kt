@@ -15,6 +15,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -579,12 +586,11 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                                         ) {
                                             NativePlayer(url = activeUrl)
                                             Icon(
-                                                Icons.Default.Search,
+                                                Icons.Default.Fullscreen, // Ganti Search dengan Fullscreen
                                                 contentDescription = "Fullscreen",
                                                 modifier = Modifier.size(48.dp),
                                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                             )
-                                        }
                                     }
                                 }
                             }
