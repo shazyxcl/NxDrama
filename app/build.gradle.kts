@@ -1,14 +1,12 @@
-plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plibs.plugins.jetbrains.kotlin.android)
+alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
-}
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 35
+    compileSdk = 36
     
     defaultConfig {
         applicationId = "com.example.myapplication"
