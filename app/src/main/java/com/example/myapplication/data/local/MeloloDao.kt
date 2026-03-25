@@ -1,4 +1,4 @@
-package id.sansekai.melolo.data.local
+package com.example.myapplication.data.local
 
 import androidx.room.Dao
 import androidx.room.Insert
