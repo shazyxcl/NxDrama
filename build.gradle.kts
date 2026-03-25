@@ -2,7 +2,8 @@
 plugins {
     id("com.android.application") version "8.9.1" apply false
     id("com.android.library") version "8.9.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.7.20" apply false     
+    id("org.jetbrains.kotlin.android") version "1.9.0" apply false  // Updated from 1.7.20
+    id("org.jetbrains.kotlin.kapt") version "1.9.0" apply false     // Add this line
 }
 
 tasks.register<Delete>("clean") {
