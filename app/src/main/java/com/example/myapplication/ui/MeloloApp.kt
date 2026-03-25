@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -61,6 +63,7 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
     }
 
     if (showFullscreenPlayer && activeUrl.isNotBlank()) {
+        // Gunakan PlayerScreen yang sudah ada di file terpisah
         PlayerScreen(
             url = activeUrl,
             title = state.detail?.title ?: "Player",
@@ -586,11 +589,12 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                                         ) {
                                             NativePlayer(url = activeUrl)
                                             Icon(
-                                                Icons.Default.Fullscreen, // Ganti Search dengan Fullscreen
+                                                Icons.Default.Fullscreen,
                                                 contentDescription = "Fullscreen",
                                                 modifier = Modifier.size(48.dp),
                                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                             )
+                                        }
                                     }
                                 }
                             }
@@ -715,7 +719,7 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
                                         }
                                         if (active) {
                                             Icon(
-                                                Icons.Default.Search,
+                                                Icons.Default.PlayArrow,
                                                 contentDescription = "Playing",
                                                 modifier = Modifier.size(16.dp)
                                             )
@@ -751,7 +755,6 @@ fun MeloloApp(vm: MeloloViewModel = viewModel()) {
     }
 }
 
-// Rest of the composable functions remain the same...
 @Composable
 private fun DramaListItem(
     item: DramaItem,
