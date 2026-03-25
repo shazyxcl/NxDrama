@@ -105,20 +105,6 @@ fun PlayerScreen(
                     },
                     modifier = Modifier.fillMaxSize()
                 )
-
-                // 🔥 FULLSCREEN BUTTON (pojok kanan atas)
-                IconButton(
-                    onClick = onToggleFullscreen,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(12.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Fullscreen,
-                        contentDescription = "Fullscreen",
-                        tint = Color.White
-                    )
-                }
             }
         }
 

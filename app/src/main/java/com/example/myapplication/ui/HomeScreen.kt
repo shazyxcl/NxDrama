@@ -85,7 +85,7 @@ fun HomeScreen(
             if (state.libraryMode == LibraryMode.EXPLORE) {
 
                 item {
-                    Card {
+                    ElevatedCard {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 "Selamat Datang!",
@@ -170,7 +170,7 @@ fun HomeScreen(
                     }
                 } else {
                     items(state.history) { history ->
-                        Card(
+                        ElevatedCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 6.dp)
