@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plibs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
@@ -58,7 +58,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.foundation)
     
-    // Activity Compose - PENTING untuk ComponentActivity dan setContent
+    // Activity Compose
     implementation(libs.androidx.activity.compose)
     
     // Lifecycle
@@ -83,6 +83,12 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // Image Loading
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
