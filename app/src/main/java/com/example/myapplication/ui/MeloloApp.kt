@@ -4,6 +4,7 @@ import android.net.Uri
 import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,11 +15,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -26,18 +33,19 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
+import coil.compose.AsyncImage
 import com.example.myapplication.data.model.DramaItem
 import com.example.myapplication.data.model.FeedMode
 import com.example.myapplication.data.model.LibraryMode
@@ -47,239 +55,279 @@ import java.util.Date
 @Composable
 fun MeloloApp(vm: MeloloViewModel = viewModel()) {
     val state = vm.state
+    var showFullscreenPlayer by remember { mutableStateOf(false) }
     val activeUrl = remember(state.streamOptions, state.selectedQuality) {
         state.streamOptions.firstOrNull { it.label == state.selectedQuality }?.url
             ?: state.streamOptions.firstOrNull()?.url
             ?: ""
     }
 
-    val lastWatchedForSelected = state.selectedDrama?.bookId?.let { state.lastWatchedByBook[it] }
-
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                Text("MELOLO", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text(
-                    "Android Native dengan API Melolo",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            item {
-                TabRow(selectedTabIndex = state.libraryMode.ordinal) {
+    if (showFullscreenPlayer && activeUrl.isNotBlank()) {
+        PlayerScreen(
+            url = activeUrl,
+            title = state.detail?.title ?: "Player",
+            onBack = { showFullscreenPlayer = false },
+            onToggleFullscreen = { vm.toggleFullscreen() },
+            isFullscreen = state.isFullscreen
+        )
+    } else {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            bottomBar = {
+                NavigationBar {
                     LibraryMode.entries.forEach { mode ->
-                        Tab(
+                        NavigationBarItem(
                             selected = state.libraryMode == mode,
                             onClick = { vm.selectLibraryMode(mode) },
-                            text = { Text(mode.label) }
+                            label = { Text(mode.label) },
+                            icon = {
+                                Icon(
+                                    when (mode) {
+                                        LibraryMode.EXPLORE -> androidx.compose.material.icons.Icons.Default.Search
+                                        LibraryMode.FAVORITES -> androidx.compose.material.icons.Icons.Default.Favorite
+                                        LibraryMode.HISTORY -> androidx.compose.material.icons.Icons.Default.History
+                                    },
+                                    contentDescription = mode.label
+                                )
+                            }
                         )
                     }
                 }
             }
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Text("MELOLO", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Android Native dengan API Melolo",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
-            when (state.libraryMode) {
-                LibraryMode.EXPLORE -> {
+                when (state.libraryMode) {
+                    LibraryMode.EXPLORE -> {
+                        item {
+                            TabRow(selectedTabIndex = state.feedMode.ordinal) {
+                                FeedMode.entries.forEach { mode ->
+                                    Tab(
+                                        selected = state.feedMode == mode,
+                                        onClick = { vm.changeFeedMode(mode) },
+                                        text = { Text(mode.label) }
+                                    )
+                                }
+                            }
+                        }
+
+                        item {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                                OutlinedTextField(
+                                    value = state.searchText,
+                                    onValueChange = vm::updateSearchText,
+                                    label = { Text("Cari drama") },
+                                    singleLine = true,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Button(onClick = vm::submitSearch, modifier = Modifier.align(Alignment.CenterVertically)) {
+                                    Text("Cari")
+                                }
+                            }
+                        }
+
+                        if (state.listLoading) {
+                            item {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                    Text(" Memuat daftar drama...")
+                                }
+                            }
+                        }
+
+                        if (state.listError.isNotBlank()) {
+                            item { Text(state.listError, color = MaterialTheme.colorScheme.error) }
+                        }
+
+                        items(state.dramas, key = { it.bookId }) { drama ->
+                            DramaListItem(
+                                item = drama,
+                                active = state.selectedDrama?.bookId == drama.bookId,
+                                lastWatchedEpisode = state.lastWatchedByBook[drama.bookId]?.episodeIndex,
+                                onSelect = { vm.selectDrama(drama) }
+                            )
+                        }
+
+                        if (!state.listLoading && state.hasMore) {
+                            item {
+                                Button(onClick = vm::loadMore) {
+                                    Text(if (state.listAppending) "Memuat..." else "Muat Lagi")
+                                }
+                            }
+                        }
+                    }
+
+                    LibraryMode.FAVORITES -> {
+                        items(state.favorites, key = { it.bookId }) { drama ->
+                            DramaListItem(
+                                item = drama,
+                                active = state.selectedDrama?.bookId == drama.bookId,
+                                lastWatchedEpisode = state.lastWatchedByBook[drama.bookId]?.episodeIndex,
+                                onSelect = { vm.selectDrama(drama) }
+                            )
+                        }
+                        if (state.favorites.isEmpty()) {
+                            item { Text("Belum ada favorit.") }
+                        }
+                    }
+
+                    LibraryMode.HISTORY -> {
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Riwayat Tontonan", style = MaterialTheme.typography.titleMedium)
+                                TextButton(
+                                    onClick = vm::clearHistory,
+                                    enabled = state.history.isNotEmpty()
+                                ) {
+                                    Text("Hapus Riwayat")
+                                }
+                            }
+                        }
+                        items(state.history, key = { it.id }) { history ->
+                            HistoryListItem(item = history, onSelect = { vm.openHistoryItem(history) })
+                        }
+                        if (state.history.isEmpty()) {
+                            item { Text("Riwayat tontonan masih kosong.") }
+                        }
+                    }
+                }
+
+                item {
+                    HorizontalDivider()
+                }
+
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Detail", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                        FilledTonalButton(onClick = vm::toggleFavorite, enabled = state.selectedDrama != null) {
+                            val selected = state.selectedDrama
+                            val isFav = selected?.bookId?.let { state.favoriteIds.contains(it) } == true
+                            Text(if (isFav) "Unfavorite" else "Favorite")
+                        }
+                    }
+                }
+
+                if (state.detailLoading) {
+                    item { Text("Memuat detail...") }
+                }
+
+                if (state.detailError.isNotBlank()) {
+                    item { Text(state.detailError, color = MaterialTheme.colorScheme.error) }
+                }
+
+                state.detail?.let { detail ->
                     item {
-                        TabRow(selectedTabIndex = state.feedMode.ordinal) {
-                            FeedMode.entries.forEach { mode ->
-                                Tab(
-                                    selected = state.feedMode == mode,
-                                    onClick = { vm.changeFeedMode(mode) },
-                                    text = { Text(mode.label) }
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            // Thumbnail
+                            if (detail.thumbnail.isNotBlank()) {
+                                AsyncImage(
+                                    model = detail.thumbnail,
+                                    contentDescription = detail.title,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                            
+                            Text(detail.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            if (detail.intro.isNotBlank()) {
+                                Text(detail.intro)
+                            }
+                            Text("Ditonton: ${detail.playCount}")
+                            if (state.lastWatchedByBook[state.selectedDrama?.bookId] != null) {
+                                Text(
+                                    "Episode terakhir ditonton: ${state.lastWatchedByBook[state.selectedDrama?.bookId]?.episodeIndex}",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                         }
                     }
 
-                    item {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                            OutlinedTextField(
-                                value = state.searchText,
-                                onValueChange = vm::updateSearchText,
-                                label = { Text("Cari drama") },
-                                singleLine = true,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Button(onClick = vm::submitSearch, modifier = Modifier.align(Alignment.CenterVertically)) {
-                                Text("Cari")
-                            }
-                        }
-                    }
-
-                    if (state.listLoading) {
+                    if (activeUrl.isNotBlank()) {
                         item {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                                Text(" Memuat daftar drama...")
-                            }
-                        }
-                    }
-
-                    if (state.listError.isNotBlank()) {
-                        item { Text(state.listError, color = MaterialTheme.colorScheme.error) }
-                    }
-
-                    items(state.dramas, key = { it.bookId }) { drama ->
-                        DramaListItem(
-                            item = drama,
-                            active = state.selectedDrama?.bookId == drama.bookId,
-                            lastWatchedEpisode = state.lastWatchedByBook[drama.bookId]?.episodeIndex,
-                            onSelect = { vm.selectDrama(drama) }
-                        )
-                    }
-
-                    if (!state.listLoading && state.hasMore) {
-                        item {
-                            Button(onClick = vm::loadMore) {
-                                Text(if (state.listAppending) "Memuat..." else "Muat Lagi")
-                            }
-                        }
-                    }
-                }
-
-                LibraryMode.FAVORITES -> {
-                    items(state.favorites, key = { it.bookId }) { drama ->
-                        DramaListItem(
-                            item = drama,
-                            active = state.selectedDrama?.bookId == drama.bookId,
-                            lastWatchedEpisode = state.lastWatchedByBook[drama.bookId]?.episodeIndex,
-                            onSelect = { vm.selectDrama(drama) }
-                        )
-                    }
-                    if (state.favorites.isEmpty()) {
-                        item { Text("Belum ada favorit.") }
-                    }
-                }
-
-                LibraryMode.HISTORY -> {
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text("Riwayat Tontonan", style = MaterialTheme.typography.titleMedium)
-                            TextButton(
-                                onClick = vm::clearHistory,
-                                enabled = state.history.isNotEmpty()
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(220.dp)
+                                    .clickable { showFullscreenPlayer = true }
                             ) {
-                                Text("Hapus Riwayat")
+                                NativePlayer(url = activeUrl)
                             }
                         }
                     }
-                    items(state.history, key = { it.id }) { history ->
-                        HistoryListItem(item = history, onSelect = { vm.openHistoryItem(history) })
+
+                    if (state.streamLoading) {
+                        item { Text("Memuat stream...") }
                     }
-                    if (state.history.isEmpty()) {
-                        item { Text("Riwayat tontonan masih kosong.") }
+
+                    if (state.streamError.isNotBlank()) {
+                        item { Text(state.streamError, color = MaterialTheme.colorScheme.error) }
                     }
-                }
-            }
 
-            item {
-                HorizontalDivider()
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Detail", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    FilledTonalButton(onClick = vm::toggleFavorite, enabled = state.selectedDrama != null) {
-                        val selected = state.selectedDrama
-                        val isFav = selected?.bookId?.let { state.favoriteIds.contains(it) } == true
-                        Text(if (isFav) "Unfavorite" else "Favorite")
-                    }
-                }
-            }
-
-            if (state.detailLoading) {
-                item { Text("Memuat detail...") }
-            }
-
-            if (state.detailError.isNotBlank()) {
-                item { Text(state.detailError, color = MaterialTheme.colorScheme.error) }
-            }
-
-            state.detail?.let { detail ->
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(detail.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        if (detail.intro.isNotBlank()) {
-                            Text(detail.intro)
-                        }
-                        Text("Ditonton: ${detail.playCount}")
-                        if (lastWatchedForSelected != null) {
-                            Text(
-                                "Episode terakhir ditonton: ${lastWatchedForSelected.episodeIndex}",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-
-                if (activeUrl.isNotBlank()) {
-                    item { NativePlayer(url = activeUrl) }
-                }
-
-                if (state.streamLoading) {
-                    item { Text("Memuat stream...") }
-                }
-
-                if (state.streamError.isNotBlank()) {
-                    item { Text(state.streamError, color = MaterialTheme.colorScheme.error) }
-                }
-
-                item {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(state.streamOptions, key = { it.label }) { quality ->
-                            val active = quality.label == state.selectedQuality
-                            if (active) {
-                                FilledTonalButton(onClick = { vm.selectQuality(quality.label) }) {
-                                    Text(quality.label)
-                                }
-                            } else {
-                                Button(onClick = { vm.selectQuality(quality.label) }) {
-                                    Text(quality.label)
+                    item {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(state.streamOptions, key = { it.label }) { quality ->
+                                val active = quality.label == state.selectedQuality
+                                if (active) {
+                                    FilledTonalButton(onClick = { vm.selectQuality(quality.label) }) {
+                                        Text(quality.label)
+                                    }
+                                } else {
+                                    Button(onClick = { vm.selectQuality(quality.label) }) {
+                                        Text(quality.label)
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                item {
-                    Text("Episode", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                }
-
-                items(detail.episodes.indices.toList(), key = { idx -> detail.episodes[idx].vid }) { index ->
-                    val episode = detail.episodes[index]
-                    val active = state.selectedEpisodeIndex == index
-                    val isLastWatched = lastWatchedForSelected?.episodeIndex == episode.index
-                    val label = buildString {
-                        append("Episode ${episode.index}")
-                        if (isLastWatched) append(" (Terakhir ditonton)")
+                    item {
+                        Text("Episode", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     }
-                    Text(
-                        text = label,
-                        fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isLastWatched) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { vm.selectEpisode(index) }
-                            .padding(vertical = 4.dp)
-                    )
+
+                    items(detail.episodes.indices.toList(), key = { idx -> detail.episodes[idx].vid }) { index ->
+                        val episode = detail.episodes[index]
+                        val active = state.selectedEpisodeIndex == index
+                        val isLastWatched = state.lastWatchedByBook[state.selectedDrama?.bookId]?.episodeIndex == episode.index
+                        val label = buildString {
+                            append("Episode ${episode.index}")
+                            if (isLastWatched) append(" (Terakhir ditonton)")
+                        }
+                        Text(
+                            text = label,
+                            fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isLastWatched) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { vm.selectEpisode(index) }
+                                .padding(vertical = 4.dp)
+                        )
+                    }
                 }
             }
         }
@@ -293,29 +341,53 @@ private fun DramaListItem(
     lastWatchedEpisode: Int?,
     onSelect: () -> Unit
 ) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onSelect)
-            .padding(vertical = 4.dp)
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(8.dp)
     ) {
-        Text(
-            text = item.title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = if (active) FontWeight.Bold else FontWeight.Normal
-        )
-        if (item.episodeText.isNotBlank()) {
-            Text("Episode: ${item.episodeText}")
-        }
-        if (lastWatchedEpisode != null) {
-            Text(
-                "Terakhir ditonton: Episode $lastWatchedEpisode",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-        if (item.synopsis.isNotBlank()) {
-            Text(item.synopsis, maxLines = 2)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Thumbnail
+            if (item.thumbnail.isNotBlank()) {
+                AsyncImage(
+                    model = item.thumbnail,
+                    contentDescription = item.title,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.Normal
+                )
+                if (item.episodeText.isNotBlank()) {
+                    Text("Episode: ${item.episodeText}", style = MaterialTheme.typography.bodySmall)
+                }
+                if (lastWatchedEpisode != null) {
+                    Text(
+                        "Terakhir ditonton: Episode $lastWatchedEpisode",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                if (item.synopsis.isNotBlank()) {
+                    Text(item.synopsis, maxLines = 2, style = MaterialTheme.typography.bodySmall)
+                }
+            }
         }
     }
 }
@@ -325,15 +397,35 @@ private fun HistoryListItem(item: WatchHistoryItem, onSelect: () -> Unit) {
     val timeLabel = remember(item.watchedAt) {
         DateFormat.format("dd MMM yyyy HH:mm", Date(item.watchedAt)).toString()
     }
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onSelect)
-            .padding(vertical = 4.dp)
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(8.dp)
     ) {
-        Text(item.title, style = MaterialTheme.typography.titleMedium)
-        Text("Episode ${item.episodeIndex} | $timeLabel")
-        HorizontalDivider(modifier = Modifier.padding(top = 6.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (item.thumbnail.isNotBlank()) {
+                AsyncImage(
+                    model = item.thumbnail,
+                    contentDescription = item.title,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(item.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
+                Text("Episode ${item.episodeIndex} | $timeLabel", style = MaterialTheme.typography.bodySmall)
+            }
+        }
     }
 }
 
@@ -359,8 +451,6 @@ private fun NativePlayer(url: String) {
                 useController = true
             }
         },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(220.dp)
+        modifier = Modifier.fillMaxSize()
     )
 }

@@ -41,7 +41,8 @@ data class UiState(
     val streamLoading: Boolean = false,
     val streamError: String = "",
     val streamOptions: List<StreamOption> = emptyList(),
-    val selectedQuality: String = ""
+    val selectedQuality: String = "",
+    val isFullscreen: Boolean = false // Tambahkan state fullscreen
 )
 
 class MeloloViewModel(application: Application) : AndroidViewModel(application) {
@@ -95,7 +96,8 @@ class MeloloViewModel(application: Application) : AndroidViewModel(application) 
                 bookId = item.bookId,
                 title = item.title,
                 synopsis = "",
-                episodeText = ""
+                episodeText = "",
+                thumbnail = item.thumbnail
             )
         state = state.copy(selectedDrama = drama)
         loadDetail(drama.bookId, preferredEpisodeIndex = item.episodeIndex)
@@ -123,6 +125,10 @@ class MeloloViewModel(application: Application) : AndroidViewModel(application) 
 
     fun selectQuality(label: String) {
         state = state.copy(selectedQuality = label)
+    }
+    
+    fun toggleFullscreen() {
+        state = state.copy(isFullscreen = !state.isFullscreen)
     }
 
     private fun observeLocalLibrary() {
