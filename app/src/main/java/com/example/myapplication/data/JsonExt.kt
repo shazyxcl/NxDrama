@@ -1,4 +1,4 @@
-package id.sansekai.melolo.data
+package com.example.myapplication.data
 
 import com.google.gson.JsonObject
 
