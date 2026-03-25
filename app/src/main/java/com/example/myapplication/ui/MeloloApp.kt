@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.foundation.background
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
