@@ -40,12 +40,19 @@ class MeloloRepository private constructor(
         val title = info.getString("series_title") ?: return null
         val intro = info.getString("series_intro").orEmpty()
         val playCount = info.getLong("series_play_cnt") ?: 0L
+        val thumbnail = info.getString("series_cover").orEmpty() // Ambil thumbnail
         val episodes = info.getAsJsonArray("video_list")?.mapNotNull { item ->
             val obj = item.asJsonObject
             val vid = obj.getString("vid") ?: return@mapNotNull null
             EpisodeItem(vid = vid, index = obj.getInt("vid_index") ?: 0)
         }.orEmpty()
-        return DramaDetail(title = title, intro = intro, playCount = playCount, episodes = episodes)
+        return DramaDetail(
+            title = title, 
+            intro = intro, 
+            playCount = playCount, 
+            episodes = episodes,
+            thumbnail = thumbnail
+        )
     }
 
     suspend fun loadStream(videoId: String): List<StreamOption> {
@@ -94,7 +101,8 @@ class MeloloRepository private constructor(
                     bookId = entity.bookId,
                     title = entity.title,
                     synopsis = entity.synopsis,
-                    episodeText = entity.episodeText
+                    episodeText = entity.episodeText,
+                    thumbnail = entity.thumbnail
                 )
             }
         }
@@ -112,6 +120,7 @@ class MeloloRepository private constructor(
                 title = item.title,
                 synopsis = item.synopsis,
                 episodeText = item.episodeText,
+                thumbnail = item.thumbnail,
                 updatedAt = System.currentTimeMillis()
             )
         )
@@ -124,6 +133,7 @@ class MeloloRepository private constructor(
                 title = item.title,
                 episodeIndex = episode.index,
                 videoId = episode.vid,
+                thumbnail = item.thumbnail,
                 watchedAt = System.currentTimeMillis()
             )
         )
@@ -143,7 +153,8 @@ class MeloloRepository private constructor(
                     title = entity.title,
                     episodeIndex = entity.episodeIndex,
                     videoId = entity.videoId,
-                    watchedAt = entity.watchedAt
+                    watchedAt = entity.watchedAt,
+                    thumbnail = entity.thumbnail
                 )
             }
         }
@@ -168,11 +179,13 @@ class MeloloRepository private constructor(
                 val id = book.getString("book_id") ?: return@forEach
                 if (seen.contains(id)) return@forEach
                 val title = book.getString("book_name") ?: return@forEach
+                val thumbnail = book.getString("cover").orEmpty() // Ambil thumbnail
                 items += DramaItem(
                     bookId = id,
                     title = title,
                     synopsis = book.getString("abstract").orEmpty(),
-                    episodeText = book.getString("serial_count").orEmpty()
+                    episodeText = book.getString("serial_count").orEmpty(),
+                    thumbnail = thumbnail
                 )
                 seen += id
             }
