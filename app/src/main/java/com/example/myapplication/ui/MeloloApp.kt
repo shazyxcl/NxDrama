@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.navigation.compose.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
