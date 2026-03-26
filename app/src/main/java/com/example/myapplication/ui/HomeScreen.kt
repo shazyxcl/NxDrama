@@ -96,6 +96,11 @@ fun HomeScreen(
                     }
                 }
 
+                // Jarak antara Tab dan Search
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 item {
                     OutlinedTextField(
                         value = searchText,
@@ -108,6 +113,11 @@ fun HomeScreen(
                     )
                 }
 
+                // Jarak antara Search dan Button
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
                 item {
                     Button(
                         onClick = {
@@ -118,6 +128,11 @@ fun HomeScreen(
                     ) {
                         Text("Cari Drama")
                     }
+                }
+
+                // Jarak antara Button dan List Drama
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 items(state.dramas) { drama ->
