@@ -11,7 +11,13 @@ enum class AppTheme(val label: String) {
 enum class AppLanguage(val label: String, val code: String) {
     INDONESIAN("Bahasa Indonesia", "id"),
     ENGLISH("English", "en"),
-    CHINESE("中文", "zh")
+    CHINESE("中文", "zh");
+    
+    companion object {
+        fun fromCode(code: String): AppLanguage {
+            return entries.find { it.code == code } ?: INDONESIAN
+        }
+    }
 }
 
 // Data class untuk menyimpan pengaturan aplikasi
