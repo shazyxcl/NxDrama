@@ -7,6 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.MeloloRepository
+import com.example.myapplication.data.model.AppLanguage
+import com.example.myapplication.data.model.AppSettings
+import com.example.myapplication.data.model.AppTheme
 import com.example.myapplication.data.model.DramaDetail
 import com.example.myapplication.data.model.DramaItem
 import com.example.myapplication.data.model.FeedMode
@@ -42,7 +45,8 @@ data class UiState(
     val streamError: String = "",
     val streamOptions: List<StreamOption> = emptyList(),
     val selectedQuality: String = "",
-    val isFullscreen: Boolean = false // Tambahkan state fullscreen
+    val isFullscreen: Boolean = false,
+    val settings: AppSettings = AppSettings() // Tambahkan state settings
 )
 
 class MeloloViewModel(application: Application) : AndroidViewModel(application) {
@@ -130,6 +134,24 @@ class MeloloViewModel(application: Application) : AndroidViewModel(application) 
     fun toggleFullscreen() {
         state = state.copy(isFullscreen = !state.isFullscreen)
     }
+
+    // ================= SETTINGS FUNCTIONS =================
+    
+    fun updateTheme(theme: AppTheme) {
+        state = state.copy(
+            settings = state.settings.copy(theme = theme)
+        )
+        // TODO: Implement persistence with SharedPreferences or DataStore
+    }
+
+    fun updateLanguage(language: AppLanguage) {
+        state = state.copy(
+            settings = state.settings.copy(language = language)
+        )
+        // TODO: Implement persistence and app locale change
+    }
+
+    // ======================================================
 
     private fun observeLocalLibrary() {
         viewModelScope.launch {

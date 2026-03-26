@@ -16,7 +16,6 @@ fun MeloloApp(vm: MeloloViewModel = androidx.lifecycle.viewmodel.compose.viewMod
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    var showSettings by remember { mutableStateOf(false) }
     var showPlayer by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
@@ -30,7 +29,9 @@ fun MeloloApp(vm: MeloloViewModel = androidx.lifecycle.viewmodel.compose.viewMod
                     selected = true,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        navController.navigate("home")
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
+                        }
                     }
                 )
 
@@ -38,8 +39,8 @@ fun MeloloApp(vm: MeloloViewModel = androidx.lifecycle.viewmodel.compose.viewMod
                     label = { Text("Settings") },
                     selected = false,
                     onClick = {
-                        showSettings = true
                         scope.launch { drawerState.close() }
+                        navController.navigate("settings")
                     }
                 )
             }
@@ -66,6 +67,13 @@ fun MeloloApp(vm: MeloloViewModel = androidx.lifecycle.viewmodel.compose.viewMod
                     onPlay = { showPlayer = true }
                 )
             }
+
+            composable("settings") {
+                SettingsScreen(
+                    vm = vm,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
 
         if (showPlayer) {
@@ -75,19 +83,6 @@ fun MeloloApp(vm: MeloloViewModel = androidx.lifecycle.viewmodel.compose.viewMod
                 onBack = { showPlayer = false },
                 onToggleFullscreen = { vm.toggleFullscreen() },
                 isFullscreen = vm.state.isFullscreen
-            )
-        }
-
-        if (showSettings) {
-            AlertDialog(
-                onDismissRequest = { showSettings = false },
-                confirmButton = {
-                    TextButton(onClick = { showSettings = false }) {
-                        Text("Tutup")
-                    }
-                },
-                title = { Text("Settings") },
-                text = { Text("Melolo v1.0") }
             )
         }
     }
