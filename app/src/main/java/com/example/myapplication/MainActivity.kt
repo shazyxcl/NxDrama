@@ -7,23 +7,36 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.ui.MeloloApp
+import com.example.myapplication.ui.MeloloViewModel
 import com.example.myapplication.ui.theme.MeloloTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MeloloTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MeloloApp()
-                }
-            }
+            MeloloAppWithTheme()
+        }
+    }
+}
+
+@Composable
+fun MeloloAppWithTheme() {
+    val viewModel: MeloloViewModel = viewModel()
+    val theme by viewModel.state.settings.theme
+    
+    MeloloTheme(
+        theme = theme
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            MeloloApp(vm = viewModel)
         }
     }
 }
