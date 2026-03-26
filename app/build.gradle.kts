@@ -79,6 +79,7 @@ dependencies {
     
     // Activity Compose
     implementation("androidx.activity:activity-compose:1.9.1")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
