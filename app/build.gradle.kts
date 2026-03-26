@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 35
+    compileSdk = 36
     
     defaultConfig {
         applicationId = "com.example.myapplication"
         minSdk = 21
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         
@@ -23,17 +23,17 @@ android {
     }
 
     // Konfigurasi signing
-    signingConfigs {
-        create("release") {
-            storeFile file("ndevz.keystore")
-            storePassword 'ndevz'
-            keyAlias 'ndevz'
-            keyPassword 'ndevz'
-            v1SigningEnabled true
-            v2SigningEnabled true
-            enableV3Signing true
-        }
-    }
+  //  signingConfigs {
+      //  create("release") {
+         //   storeFile file("ndevz.keystore")
+           // storePassword 'ndevz'
+          //  keyAlias 'ndevz'
+          /!  keyPassword 'ndevz'
+          //  v1SigningEnabled true
+          //  v2SigningEnabled true
+            //enableV3Signing true
+     //   }
+   // }
 
     buildTypes {
         release {
