@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.DataStoreManager
 import com.example.myapplication.data.MeloloRepository
 import com.example.myapplication.data.model.AppLanguage
 import com.example.myapplication.data.model.AppSettings
@@ -46,18 +47,40 @@ data class UiState(
     val streamOptions: List<StreamOption> = emptyList(),
     val selectedQuality: String = "",
     val isFullscreen: Boolean = false,
-    val settings: AppSettings = AppSettings() // Tambahkan state settings
+    val settings: AppSettings = AppSettings()
 )
 
 class MeloloViewModel(application: Application) : AndroidViewModel(application) {
     private val repo = MeloloRepository.getInstance(application)
-
+    private val dataStoreManager = DataStoreManager.getInstance(application)
+    
     var state by mutableStateOf(UiState())
         private set
 
     init {
         observeLocalLibrary()
+        loadSettings()
         refreshFeed()
+    }
+    
+    private fun loadSettings() {
+        viewModelScope.launch {
+            // Load theme
+            dataStoreManager.themeFlow.collectLatest { theme ->
+                state = state.copy(
+                    settings = state.settings.copy(theme = theme)
+                )
+            }
+        }
+        
+        viewModelScope.launch {
+            // Load language
+            dataStoreManager.languageFlow.collectLatest { language ->
+                state = state.copy(
+                    settings = state.settings.copy(language = language)
+                )
+            }
+        }
     }
 
     fun selectLibraryMode(mode: LibraryMode) {
@@ -141,14 +164,28 @@ class MeloloViewModel(application: Application) : AndroidViewModel(application) 
         state = state.copy(
             settings = state.settings.copy(theme = theme)
         )
-        // TODO: Implement persistence with SharedPreferences or DataStore
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreManager.saveTheme(theme)
+        }
     }
 
     fun updateLanguage(language: AppLanguage) {
         state = state.copy(
             settings = state.settings.copy(language = language)
         )
-        // TODO: Implement persistence and app locale change
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreManager.saveLanguage(language)
+        }
+    }
+    
+    // Get current theme based on settings
+    fun isDarkTheme(): Boolean {
+        return when (state.settings.theme) {
+            AppTheme.LIGHT -> false
+            AppTheme.DARK -> true
+            AppTheme.SYSTEM -> android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S &&
+                    androidx.compose.foundation.isSystemInDarkTheme()
+        }
     }
 
     // ======================================================
