@@ -22,10 +22,28 @@ android {
         }
     }
 
+    // Konfigurasi signing
+    signingConfigs {
+        create("release") {
+            storeFile file("ndevz.keystore")
+            storePassword 'ndevz'
+            keyAlias 'ndevz'
+            keyPassword 'ndevz'
+            v1SigningEnabled true
+            v2SigningEnabled true
+            enableV3Signing true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            isShrinkResources = true // Aktifkan shrinkResources
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release") // Gunakan signing config release
         }
     }
     
@@ -78,8 +96,8 @@ dependencies {
     // Media3
     implementation("androidx.media3:media3-exoplayer:1.5.1")
     implementation("androidx.media3:media3-ui:1.5.1")
-    implementation("androidx.media3:media3-exoplayer-hls:1.5.1")  // Untuk HLS support
-    implementation("androidx.media3:media3-exoplayer-dash:1.5.1") // Untuk DASH support
+    implementation("androidx.media3:media3-exoplayer-hls:1.5.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.5.1")
     
     // Room
     implementation("androidx.room:room-runtime:2.7.0")
