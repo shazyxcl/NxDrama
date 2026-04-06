@@ -22,19 +22,6 @@ android {
         }
     }
 
-    // Konfigurasi signing
-  //  signingConfigs {
-      //  create("release") {
-         //   storeFile file("ndevz.keystore")
-           // storePassword 'ndevz'
-          //  keyAlias 'ndevz'
-          /!  keyPassword 'ndevz'
-          //  v1SigningEnabled true
-          //  v2SigningEnabled true
-            //enableV3Signing true
-     //   }
-   // }
-
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -43,7 +30,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release") // Gunakan signing config release
         }
     }
     
